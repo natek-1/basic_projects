@@ -1,0 +1,1 @@
+# handle diffrent parts of the data (ie one hot encoding, missing values, train, validation and test etc) 
