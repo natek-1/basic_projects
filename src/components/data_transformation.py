@@ -10,6 +10,8 @@ from src.exception import CustomException
 from src.logger import logging
 import os
 
+from src.utils import save_object
+
 @dataclass
 class DataTransformationConfig:
     preprocessor_obj_file_path = os.path.join("artifacts", 'preprocessor.pkl')
@@ -23,14 +25,8 @@ class DataTransformation:
         This function is responsible for data tranformation
         '''
         try:
-            numerical_columns = ["writing_score", "reading_score"]
-            categorical_columns = [
-                "gender",
-                "race_ethnicity",
-                "parental_level_of_education",
-                "lunch",
-                "test_preparation_course",
-            ]
+            numerical_columns = ["writing score", "reading score"]
+            categorical_columns = ['gender', 'race/ethnicity', 'parental level of education', 'lunch', 'test preparation course']
 
             logging.info(f'Categorical columns: {categorical_columns}')
             logging.info(f'Numerical columns: {numerical_columns}')
@@ -48,7 +44,7 @@ class DataTransformation:
                 steps=[
                     ('imputer', SimpleImputer(strategy="most_frequent")),
                     ("one_hot_encoder", OneHotEncoder()),
-                    ('scaler', StandardScaler()) 
+                    ('scaler', StandardScaler(with_mean=False)) 
                 ]
             )
             logging.info("Categorical coumns encoding completed")
@@ -74,7 +70,7 @@ class DataTransformation:
 
             preprocessing_obj = self.get_data_transformer_object()
 
-            target_column_name = "math_score"
+            target_column_name = "math score"
             numerical_columns = ["writing_score", "reading_score"]
 
             input_feature_train_df = train_df.drop(columns=[target_column_name], axis=1)
