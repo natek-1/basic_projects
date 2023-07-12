@@ -13,6 +13,8 @@ import numpy as np
 
 from src.exception import CustomException
 from src.logger import logging
+from src.components.data_ingestion import DataIngestion
+from src.components.data_transformation import DataTransformation
 
 from src.utils import save_object, evaluate_model
 
@@ -51,12 +53,12 @@ class ModelTrainer:
             params={
                 "Linear Regression":{},
                 "Lasso": {
-                    'alpha': np.arange(0.00, 1.0, 0.1)
+                    'alpha': [1e-15,1e-10,1e-8,1e-3,1e-2,0.1, 0.2, 0.3, 0.5, 0.8,1]
                 },
                 "Ridge":{
-                    [1e-15,1e-10,1e-8,1e-3,1e-2,1,5,10,20,30,35,40,45,50,55,100]
+                    'alpha': [1e-15,1e-10,1e-8,1e-3,1e-2,1,5,10,20,30,35,40,45,50,55,100]
                 },
-                "K-Neighbors Regressor": {
+               "K-Neighbors Regressor": {
                     'n_neighbors':[5, 4, 8, 3, 6, 10],
                     'algorithm': ['auto', 'ball_tree', 'kd_tree']
                 },
@@ -78,17 +80,16 @@ class ModelTrainer:
                     'learning_rate':[.1,.01,.05,.001],
                     'n_estimators': [8,16,32,64,128,256]
                 },
-                '''"CatBoosting Regressor":{
-                    'depth': [6,8,10],
-                    'learning_rate': [0.01, 0.05, 0.1],
-                    'iterations': [30, 50, 100]
-                },'''
+                # "CatBoosting Regressor":{
+                #     'depth': [6,8,10],
+                #     'learning_rate': [0.01, 0.05, 0.1],
+                #     'iterations': [30, 50, 100]
+                # },
                 "AdaBoost Regressor":{
                     'learning_rate':[.1,.01,0.5,.001],
                     'loss':['linear','square','exponential'],
                     'n_estimators': [8,16,32,64,128,256]
-                }
-                
+                } 
             }
             model_report, best_models = evaluate_model(X_train=X_train, y_train=y_train,X_test=X_test, y_test=y_test , models=models, params=params)
 
@@ -98,6 +99,7 @@ class ModelTrainer:
                 list(model_report.values()).index(best_model_score)
             ]
             best_model = best_models[best_model_name]
+            logging.info(model_report)
 
             if best_model_score < 0.6:
                 raise CustomException("No best model found")
@@ -114,7 +116,12 @@ class ModelTrainer:
         
 if __name__ == "__main__":
     model_trainer = ModelTrainer()
-    score = model_trainer.initial_model_trainer()
+    
+    data_ingestor = DataIngestion()
+    train_data, test_data, _ = data_ingestor.initiate_data_ingestion()
+    data_transormation = DataTransformation()
+    train_array, test_array, obj = data_transormation.initiate_data_transformation(train_data, test_data)
+    score = model_trainer.initial_model_trainer(train_array, test_array, obj)
     logging.info(f"best model score found: {score}")
 
 
