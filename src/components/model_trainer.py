@@ -99,7 +99,7 @@ class ModelTrainer:
                 list(model_report.values()).index(best_model_score)
             ]
             best_model = best_models[best_model_name]
-            logging.info(model_report)
+            logging.info(f"afer training this is the score of all the models:\n {model_report}")
 
             if best_model_score < 0.6:
                 raise CustomException("No best model found")
@@ -119,8 +119,10 @@ if __name__ == "__main__":
     
     data_ingestor = DataIngestion()
     train_data, test_data, _ = data_ingestor.initiate_data_ingestion()
+
     data_transormation = DataTransformation()
     train_array, test_array, obj = data_transormation.initiate_data_transformation(train_data, test_data)
+    
     score = model_trainer.initial_model_trainer(train_array, test_array, obj)
     logging.info(f"best model score found: {score}")
 
